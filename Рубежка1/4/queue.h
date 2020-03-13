@@ -4,7 +4,7 @@ typedef struct QueueNode {
     struct QueueNode* next;
 } QueueNode;
 
-typedef struct {
+typedef struct ConcurrentQueue{
     QueueNode* first;
     pthread_mutex_t mutex;
 } ConcurrentQueue;

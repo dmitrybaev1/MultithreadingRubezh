@@ -87,6 +87,85 @@ char remove(ThinList* list, int key)
 
     return 0;
 }
+char areSame(ThinNode *node1, ThinNode *node2) {
+    if (node1->key == node2->key && node1->value == node2->value)
+        return 1;
+    else
+        return 0;
+}
+
+ThinList *initialize_list(void) {
+    ThinList *list;
+
+    if ((list = (ThinList *) calloc(1, sizeof(ThinList))) == NULL) {
+        return NULL;
+    }
+
+    if ((list->root = (ThinNode *) calloc(1, sizeof(ThinNode))) == NULL) {
+        free(list->root);
+        free(list);
+        return NULL;
+    }
+
+    list->root= NULL;
+
+    return list;
+}
+
+ThinList *copy_list(ThinList *list, ThinList *list_copy) {
+    ThinNode *curr = list->root;
+
+    list_copy = initialize_list();
+
+    while (curr != NULL) {
+        if (list_copy->root == NULL){
+            ThinNode *tmp = (ThinNode*) malloc(sizeof(ThinNode));
+            tmp->key = curr->key;
+            tmp->value = curr->value;
+            tmp->next = NULL;
+            pthread_mutex_init(&tmp->mutex, NULL);
+
+            list_copy->root = tmp;
+        } else {
+            ThinNode* localNode = list_copy->root;
+
+            while (localNode->next != NULL) {
+                localNode = localNode->next;
+            }
+
+            ThinNode *tmp = (ThinNode*) malloc(sizeof(ThinNode));
+            tmp->key = curr->key;
+            tmp->value = curr->value;
+            tmp->next = NULL;
+            pthread_mutex_init(&tmp->mutex, NULL);
+
+            localNode->next = tmp;
+        }
+
+        curr = curr->next;
+    }
+
+    return list_copy;
+}
+
+ThinList *get_snapshot(ThinList *list) {
+    ThinList *list_copy = initialize_list();
+    ThinNode *curr, *curr_temp_copy;
+    list_copy = copy_list(list, list_copy);
+    curr = list->root;
+    curr_temp_copy = list_copy->root;
+    while (curr != NULL) {
+        if (areSame(curr, curr_temp_copy) == 0) {
+            list_copy = copy_list(list, list_copy);
+            curr = list->root;
+            curr_temp_copy = list_copy->root;
+        } else {
+            curr = curr->next;
+            curr_temp_copy = curr_temp_copy->next;
+        }
+    }
+    return list_copy;
+}
 
 
 

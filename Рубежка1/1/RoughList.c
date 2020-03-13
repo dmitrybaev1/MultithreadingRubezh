@@ -76,3 +76,51 @@ char remove(RoughList* list, int key)
     return 0;
 }
 
+RoughList *initialize_list() {
+    RoughList *list;
+    if ((list = (RoughList *) calloc(1, sizeof(RoughList))) == NULL) {
+        return NULL;
+    }
+    if ((list->root = (RoughNode *) calloc(1, sizeof(RoughNode))) == NULL) {
+        free(list);
+        return NULL;
+    }
+    list->root = NULL;
+    pthread_mutex_init(&list->mutex, NULL);
+    return list;
+}
+
+RoughList *copyList(RoughList *list, RoughList *list_copy) {
+    RoughNode *curr = list->root;
+    list_copy = initialize_list();
+    while (curr != NULL) {
+        if (list_copy->root == NULL){
+            RoughNode *tmp = (RoughNode*) malloc(sizeof(RoughNode));
+            tmp->key = curr->key;
+            tmp->value = curr->value;
+            tmp->next = NULL;
+            list_copy->root = tmp;
+        } else {
+            RoughNode* localNode = list_copy->root;
+            while (localNode->next != NULL) {
+                localNode = localNode->next;
+            }
+            RoughNode *tmp = (RoughNode*) malloc(sizeof(RoughNode));
+            tmp->key = curr->key;
+            tmp->value = curr->value;
+            tmp->next = NULL;
+            localNode->next = tmp;
+        }
+        curr = curr->next;
+    }
+    return list_copy;
+}
+
+RoughList *get_snapshot(RoughList *list) {
+    pthread_mutex_lock( &(list->mutex) );
+    RoughList *roughList = initialize_list();
+    roughList = copyList(list, roughList);
+    pthread_mutex_unlock( &(list->mutex) );
+    return roughList;
+}
+
