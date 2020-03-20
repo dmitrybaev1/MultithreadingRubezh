@@ -4,10 +4,10 @@
 
 void* worker_job(void* args)
 {
-	pthread_tPool* tp = args;
+	ThreadPool* tp = args;
     while(1) {
 		pthread_testcancel();
-		pthread_tPoolTask* task = dequeue(tp->task_queue);
+		ThreadPoolTask* task = dequeue(tp->task_queue);
 		if (task != NULL) {
 			(*task->job)(task->data);
 			free(task);
@@ -22,9 +22,9 @@ void* worker_job(void* args)
 	}
 }
 
-pthread_tPool* threadpool_create(int worker_count)
+ThreadPool* threadpool_create(int worker_count)
 {
-	pthread_tPool* tp = malloc(sizeof(pthread_tPool));
+	ThreadPool* tp = malloc(sizeof(ThreadPool));
 	tp->worker_count = worker_count;
 	pthread_mutex_init(&tp->task_mutex, NULL);
 	pthread_cond_init(&tp->task_cond, NULL);
@@ -37,9 +37,9 @@ pthread_tPool* threadpool_create(int worker_count)
 	return tp;
 }
 
-void threadpool_add_task(pthread_tPool* tp, void (*job)(void*), void* data)
+void threadpool_add_task(ThreadPool* tp, void (*job)(void*), void* data)
 {
-	pthread_tPoolTask* task = malloc(sizeof(pthread_tPoolTask));
+	ThreadPoolTask* task = malloc(sizeof(ThreadPoolTask));
 	task->job = job;
 	task->data = data;
 	enqueue(tp->task_queue, task);
@@ -51,7 +51,7 @@ void threadpool_add_task(pthread_tPool* tp, void (*job)(void*), void* data)
 	pthread_mutex_unlock(&tp->task_mutex);
 }
 
-void threadpool_destroy(pthread_tPool* tp)
+void threadpool_destroy(ThreadPool* tp)
 {
 	for (int i = 0; i < tp->worker_count; i++) {
 		pthread_cancel(tp->worker[i]);

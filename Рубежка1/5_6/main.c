@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <limits.h>
 
-#define W_COUNT 4
+#define W_COUNT 3
 #define PART_COUNT 6
 
 typedef struct SortData {
@@ -24,10 +24,13 @@ int comp(const void* a_ptr, const void* b_ptr)
 
 int verify_sorted(int* arr, int n)
 {
+    printf("%d\n",arr[0]);
 	for (int i = 1; i < n; i++) {
 		if (arr[i - 1] > arr[i]) {
+		    printf("%d error!\n",arr[i]);
 			return 0;
 		}
+        printf("%d\n",arr[i]);
 	}
 	return 1;
 }
@@ -55,7 +58,7 @@ int main()
 	int* arr = malloc(sizeof(int) * n);
 	fread(arr, sizeof(int), n, file);
 	fclose(file);
-	pthread_tPool* tp = threadpool_create(W_COUNT);
+	ThreadPool* tp = threadpool_create(W_COUNT);
 	int ready_count = 0;
 	pthread_mutex_t ready_mutex;
 	pthread_mutex_init(&ready_mutex, NULL);
@@ -111,5 +114,5 @@ int main()
 	pthread_mutex_destroy(&ready_mutex);
 	pthread_cond_destroy(&ready_cond);
 	threadpool_destroy(tp);
-	return EXIT_SUCCESS;
+	return 0;
 }

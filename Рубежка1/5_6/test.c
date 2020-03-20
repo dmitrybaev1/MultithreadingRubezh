@@ -5,7 +5,7 @@
 
 int main()
 {
-	pthread_tPool* tp = threadpool_create(4);
+	ThreadPool* tp = threadpool_create(4);
 	puts("Created");
 
 	sleep(2);
